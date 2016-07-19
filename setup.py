@@ -10,25 +10,25 @@ openni2_include = os.getenv('OPENNI2_INCLUDE')
 openni2_lib = os.getenv('OPENNI2_REDIST')
 
 if openni2_include is None or openni2_lib is None:
-    print """
+    print("""
     Please make sure OPENNI2_INCLUDE and OPENNI2_REDIST are set. You can
     source the OpenNIDevEnvironment that the OpenNI2 installer generates to set
     these, or you can set them manually. To keep these environment variables
     when running with sudo, you can use sudo -E python setup.py install.
-    """
+    """)
     sys.exit(1)
 
 has_emitter_control = os.getenv('OPENNI2_HAS_EMITTER_CONTROL', 0)
 has_emitter_control = bool(has_emitter_control)
 if has_emitter_control:
-    print "Using emitter control API"
+    print("Using emitter control API")
 
 class build_ext_with_config(build_ext):
     def build_extensions(self):
-        print 'Generate config.pxi'
+        print('Generate config.pxi')
         filename = os.path.join(os.path.dirname(__file__), 'config.pxi')
         with open(filename, 'w') as fd:
-                for k, v in c_options.iteritems():
+                for k, v in c_options.items():
                             fd.write('DEF %s = %d\n' % (k.upper(), int(v)))
         build_ext.build_extensions(self)
         os.remove(filename)

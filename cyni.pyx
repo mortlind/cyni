@@ -14,11 +14,11 @@ import sys
 from struct import pack, unpack, calcsize
 
 pixelFormats = {
-    "rgb": c_openni2.PIXEL_FORMAT_RGB888,
-    "yuv422": c_openni2.PIXEL_FORMAT_YUV422,
-    "gray16": c_openni2.PIXEL_FORMAT_GRAY16,
-    "depth1mm": c_openni2.PIXEL_FORMAT_DEPTH_1_MM,
-    "depth100um": c_openni2.PIXEL_FORMAT_DEPTH_100_UM,
+    b"rgb": c_openni2.PIXEL_FORMAT_RGB888,
+    b"yuv422": c_openni2.PIXEL_FORMAT_YUV422,
+    b"gray16": c_openni2.PIXEL_FORMAT_GRAY16,
+    b"depth1mm": c_openni2.PIXEL_FORMAT_DEPTH_1_MM,
+    b"depth100um": c_openni2.PIXEL_FORMAT_DEPTH_100_UM,
 }
 
 pixelFormatsReverse = dict([[v, k] for k, v in pixelFormats.items()])
@@ -166,8 +166,8 @@ class Frame(object):
 
 cdef class VideoStream(object):
     cdef c_openni2.VideoStream _stream
-    cdef string _streamType
-    cdef string _pixelFormat
+    cdef bytes _streamType
+    cdef bytes _pixelFormat
     cdef int frameSize
 
     cdef readonly int width
@@ -200,7 +200,7 @@ cdef class VideoStream(object):
                 status = self._stream.create(_device, c_openni2.SENSOR_IR)
 
         if status != c_openni2.STATUS_OK:
-            error("Error opening %s stream." % self.streamType)
+            error("Error opening %s stream." % self._streamType)
 
         cdef const c_openni2.SensorInfo* _info = &self._stream.getSensorInfo()
 
@@ -208,9 +208,9 @@ cdef class VideoStream(object):
         _modes = &(_info.getSupportedVideoModes())
 
         foundMode = False
-        if self._streamType == b"color" and pixelFormat != "rgb":
+        if self._streamType == b"color" and pixelFormat != b"rgb":
             if pixelFormat is None:
-                pixelFormat = "rgb"
+                pixelFormat = b"rgb"
             else:
                 error("Only RGB currently supported for color streams.")
                 self.destroy()
@@ -233,15 +233,15 @@ cdef class VideoStream(object):
             # Set the pixel format in case it was None
             pixelFormat = pixelFormatsReverse[mode.getPixelFormat()]
 
-            if pixelFormat == "rgb":
+            if pixelFormat == b"rgb":
                 pixelSize = sizeof(c_openni2.RGB888Pixel)
-            elif pixelFormat == "yuv422":
+            elif pixelFormat == b"yuv422":
                 pixelSize = sizeof(c_openni2.YUV422DoublePixel)
-            elif pixelFormat == "depth1mm":
+            elif pixelFormat == b"depth1mm":
                 pixelSize = sizeof(c_openni2.DepthPixel)
-            elif pixelFormat == "depth100um":
+            elif pixelFormat == b"depth100um":
                 pixelSize = sizeof(c_openni2.DepthPixel)
-            elif pixelFormat == "gray16":
+            elif pixelFormat == b"gray16":
                 pixelSize = sizeof(c_openni2.Grayscale16Pixel)
 
             self._pixelFormat = pixelFormat
