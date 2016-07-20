@@ -1,6 +1,6 @@
 import cyni
 import numpy as np
-import Image
+from PIL import Image
 
 cyni.initialize()
 device = cyni.getAnyDevice()
