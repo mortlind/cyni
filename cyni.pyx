@@ -578,7 +578,7 @@ def writePCD(pointCloud, filename, ascii=False):
               pointCloud_tmp.tofile(f)
  
 def readPCD(filename):
-    with open(filename, 'r') as f:
+    with open(filename, 'rb') as f:
         #"# .PCD v.7 - Point Cloud Data file format\n"
         f.readline()
 
@@ -631,13 +631,13 @@ def readPCD(filename):
                 if ascii:
                     data = [float(x) for x in f.readline().strip().split()]
                 else:
-                    data = unpack('ffff', f.read(pointSize))
+                    data = unpack('fff', f.read(pointSize))
 
                 pointCloud[row, col, 0] = data[0]
                 pointCloud[row, col, 1] = data[1]
                 pointCloud[row, col, 2] = data[2]
                 if rgb:
-                    rgb_float = data[3]
+                    rgb_float = unpack('f', f.read(1))
                     packed = pack('f', rgb_float)
                     rgb_int = unpack('i', packed)[0]
                     r = rgb_int >> 16 & 0x0000ff
