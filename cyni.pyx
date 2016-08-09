@@ -38,7 +38,7 @@ def error(*args):
 def initialize():
     ret = c_openni2.initialize()
     if ret !=  c_openni2.STATUS_OK:
-        raise RuntimeError("Failed to initialize OpenNi2")
+        raise RuntimeError("Failed to initialize OpenNi2, return code was {}".format(ret))
     return ret
 
 
