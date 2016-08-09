@@ -36,7 +36,10 @@ def error(*args):
 
 
 def initialize():
-    return c_openni2.initialize()
+    ret = c_openni2.initialize()
+    if ret !=  c_openni2.STATUS_OK:
+        raise RuntimeError("Failed to initialize OpenNi2")
+    return ret
 
 
 def enumerateDevices():
@@ -496,6 +499,8 @@ def registerDepthMap(np.ndarray[np.uint16_t, ndim=2] depthMapIn, np.ndarray[np.u
 
 def getAnyDevice():
     deviceList = enumerateDevices()
+    if not deviceList:
+        raise RuntimeError("Node device found")
     return Device(deviceList[0]['uri'])
 
 def depthMapToImage(image):
