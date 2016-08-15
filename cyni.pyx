@@ -524,42 +524,42 @@ def depthMapToPointCloud(depthMap, depthStream, colorImage=None):
             raise Exception("Depth and color images must have save dimensions.")
 
 def writePCD(pointCloud, filename, ascii=False):
-    with open(filename, 'w') as f:
+    with open(filename, 'wb') as f:
         height = pointCloud.shape[0]
         width = pointCloud.shape[1]
-        f.write("# .PCD v.7 - Point Cloud Data file format\n")
-        f.write("VERSION .7\n")
+        f.write(b"# .PCD v.7 - Point Cloud Data file format\n")
+        f.write(b"VERSION .7\n")
         if pointCloud.shape[2] == 3:
-            f.write("FIELDS x y z\n")
-            f.write("SIZE 4 4 4\n")
-            f.write("TYPE F F F\n")
-            f.write("COUNT 1 1 1\n")
+            f.write(b"FIELDS x y z\n")
+            f.write(b"SIZE 4 4 4\n")
+            f.write(b"TYPE F F F\n")
+            f.write(b"COUNT 1 1 1\n")
         else:
-            f.write("FIELDS x y z rgb\n")
-            f.write("SIZE 4 4 4 4\n")
-            f.write("TYPE F F F F\n")
-            f.write("COUNT 1 1 1 1\n")
-        f.write("WIDTH %d\n" % width)
-        f.write("HEIGHT %d\n" % height)
-        f.write("VIEWPOINT 0 0 0 1 0 0 0\n")
-        f.write("POINTS %d\n" % (height * width))
+            f.write(b"FIELDS x y z rgb\n")
+            f.write(b"SIZE 4 4 4 4\n")
+            f.write(b"TYPE F F F F\n")
+            f.write(b"COUNT 1 1 1 1\n")
+        f.write(b"WIDTH %d\n" % width)
+        f.write(b"HEIGHT %d\n" % height)
+        f.write(b"VIEWPOINT 0 0 0 1 0 0 0\n")
+        f.write(b"POINTS %d\n" % (height * width))
         if ascii:
-          f.write("DATA ascii\n")
+          f.write(b"DATA ascii\n")
           for row in range(height):
             for col in range(width):
                 if pointCloud.shape[2]== 3:
-                    f.write("%f %f %f\n" % tuple(pointCloud[row, col, :]))
+                    f.write(b"%f %f %f\n" % tuple(pointCloud[row, col, :]))
                 else:
-                    f.write("%f %f %f" % tuple(pointCloud[row, col, :3]))
+                    f.write(b"%f %f %f" % tuple(pointCloud[row, col, :3]))
                     r = int(pointCloud[row, col, 3])
                     g = int(pointCloud[row, col, 4])
                     b = int(pointCloud[row, col, 5])
                     rgb_int = (r << 16) | (g << 8) | b
                     packed = pack('i', rgb_int)
                     rgb = unpack('f', packed)[0]
-                    f.write(" %.12e\n" % rgb)
+                    f.write(b" %.12e\n" % rgb)
         else:
-          f.write("DATA binary\n")
+          f.write(b"DATA binary\n")
           if pointCloud.shape[2] == 6:
               dt = np.dtype([('x', np.float32),
                              ('y', np.float32),
@@ -568,20 +568,22 @@ def writePCD(pointCloud, filename, ascii=False):
                              ('g', np.uint8),
                              ('b', np.uint8),
                              ('I', np.uint8)])
-              pointCloud_tmp = np.zeros((6, height*width, 1), dtype=dt)
+              pointCloud_tmp = np.zeros((height*width), dtype=dt)
               for i, k in enumerate(['x', 'y', 'z', 'r', 'g', 'b']):
                   pointCloud_tmp[k] = pointCloud[:, :, i].reshape((height*width, 1))
               pointCloud_tmp.tofile(f)
           else:
-              dt = np.dtype([('x', np.float32),
-                             ('y', np.float32),
-                             ('z', np.float32),
-                             ('I', np.uint8)])
-              pointCloud_tmp = np.zeros((3, height*width, 1), dtype=dt)
-              for i, k in enumerate(['x', 'y', 'z']):
-                  pointCloud_tmp[k] = pointCloud[:, :, i].reshape((height*width, 1))
-              pointCloud_tmp.tofile(f)
- 
+              # dt = np.dtype([('x', np.float32),
+              #                ('y', np.float32),
+              #                ('z', np.float32),
+              #                #('I', np.uint8)]
+              # )
+              # pointCloud_tmp = np.zeros((height*width), dtype=dt)
+              # for i, k in enumerate(['x', 'y', 'z']):
+              #     pointCloud_tmp[k] = pointCloud[:, :, i].reshape((height*width, 1))
+              # pointCloud_tmp.tofile(f)
+              f.write(pointCloud.astype(np.float32).data.tobytes())
+              
 def readPCD(filename):
     with open(filename, 'rb') as f:
         #"# .PCD v.7 - Point Cloud Data file format\n"
